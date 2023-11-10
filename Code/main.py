@@ -1,5 +1,6 @@
 import pandas
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plot
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
@@ -21,6 +22,13 @@ print('Data types:\n',data_types)
 
 print('----------------------')
 
+
+#visualize a pairplot between numercial columns
+sns.pairplot(data[['Income','Coapplicant_Income','Credit_History','Loan_Tenor','Max_Loan_Amount']])
+plot.show()
+
+
+
 #records containing missing values are removed
 data.drop(columns=['Loan_ID'], inplace=True)
 if data.isnull().values.any():
@@ -28,6 +36,18 @@ if data.isnull().values.any():
 
 
 data_types = data_cleaned_rows.dtypes
+
+print('----------------------')
+
+#check whether numerical features have the same scale
+print('Numerical features scale: \n')
+cnt=0
+for column_name in data_cleaned_rows.columns:
+    if data_types.iloc[cnt] == 'int64' or data_types.iloc[cnt] == 'float64':
+         print(column_name,' : ',data_cleaned_rows[column_name].max()-data_cleaned_rows[column_name].min())
+    cnt += 1
+
+print('----------------------')
 
 label_encoder = LabelEncoder()
 cnt = 0
@@ -39,8 +59,7 @@ for column_name in data_cleaned_rows.columns:
             data_cleaned_rows[column_name])
     cnt += 1
 
-# x=data_cleaned_rows.max()-data_cleaned_rows.min()
-# print(x)
+
 
 
 #the features and targets are separated
