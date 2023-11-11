@@ -76,15 +76,12 @@ y_test_loan_status = y_test['Loan_Status']
 
 
 #numerical features are standardized
-cnt=0
+
 for column_name in x_train.columns:
-    if data_types.iloc[cnt] == 'int64' or data_types.iloc[cnt] == 'float64':
+    if column_name == 'Income' or column_name == 'Coapplicant_Income' or column_name == 'Loan_Tenor':
         x_train[column_name]=(x_train[column_name]-x_train[column_name].mean())/x_train[column_name].std()
         x_test[column_name] = (x_test[column_name] - x_test[column_name].mean()) / x_test[column_name].std()
-    cnt += 1
 
-# y_train['Max_Loan_Amount'] = (y_train['Max_Loan_Amount'] - y_train['Max_Loan_Amount'].mean()) / y_train['Max_Loan_Amount'].std()
-# y_test['Max_Loan_Amount'] = (y_train['Max_Loan_Amount'] - y_train['Max_Loan_Amount'].mean()) / y_train['Max_Loan_Amount'].std()
 
 
 #Convert data to Numpy array
@@ -92,6 +89,8 @@ x_train = x_train.to_numpy().reshape((-1,9))
 x_test = x_test.to_numpy().reshape((-1,9))
 y_train_max_loan = y_train_max_loan.to_numpy()
 y_test_max_loan = y_test_max_loan.to_numpy()
+y_train_loan_status = y_train_loan_status.to_numpy()
+y_test_loan_status = y_test_loan_status.to_numpy()
 
 
 #Fit a linear regression model
@@ -104,8 +103,10 @@ print('Coefficients: \n', model.coef_, " ", model.intercept_)
 #predict the loan amount
 y_pred = model.predict(x_test)
 
+
 r2 = r2_score(y_test_max_loan, y_pred)
 print("R-squared score:", r2)
+
 
 #logistic regression model
 '''
@@ -151,7 +152,7 @@ def gradient_descent(X, y, w, b, learning_rate, num_iterations):
         w -= (learning_rate * dw.T).astype(float) # Transpose dw before updating weights
         b -= learning_rate * db
         # Print cost every 100 iterations
-        if i % 100 == 0:
+        if i % 200 == 0:
             print(f"Cost after iteration {i}: {cost}")
     return w, b
 # Display the shapes of the training data (just for debugging)
@@ -162,7 +163,7 @@ def gradient_descent(X, y, w, b, learning_rate, num_iterations):
 w, b = initialize_parameters(x_train.shape[1])
 # Set hyperparameters
 learning_rate = 0.01
-num_iterations = 1000
+num_iterations = 2000
 # Train the logistic regression model
 w, b = gradient_descent(x_train, y_train_loan_status, w, b, learning_rate, num_iterations)
 # Print the trained parameters
@@ -173,19 +174,14 @@ print("Trained bias:", b)
 # calculate accuracy function
 def Accuracy(X, y, w, b):
     predictions = predict(X, w, b)
-    predictions_as_binary = (predictions >= 0.5).astype(int)
+    predictions_as_binary = ((predictions >= 0.5).astype(int)).reshape(-1)
     correct_predictions = (predictions_as_binary == y).sum()
-    accuracy = correct_predictions / len(y)
+    accuracy = (correct_predictions / len(y))*100
     return accuracy
 
 
-accuracy = Accuracy(x_test, y_test_loan_status.to_numpy(), w, b)
-print(f"Accuracy: {accuracy}")
-
-
-
-
-
+accuracy = Accuracy(x_test, y_test_loan_status, w, b)
+print("Accuracy: ",format(accuracy, ".2f"),'%')
 
 
 
