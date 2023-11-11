@@ -169,6 +169,26 @@ w, b = gradient_descent(x_train, y_train_loan_status, w, b, learning_rate, num_i
 print("Trained weights:", w)
 print("Trained bias:", b)
 
+
+# calculate accuracy function
+def Accuracy(X, y, w, b):
+    predictions = predict(X, w, b)
+    predictions_as_binary = (predictions >= 0.5).astype(int)
+    correct_predictions = (predictions_as_binary == y).sum()
+    accuracy = correct_predictions / len(y)
+    return accuracy
+
+
+accuracy = Accuracy(x_test, y_test_loan_status.to_numpy(), w, b)
+print(f"Accuracy: {accuracy}")
+
+
+
+
+
+
+
+
 #load_new analysis and preprocessing part
 # Load the "loan_new.csv" dataset.
 print("------------------------Loan_new.csv Part----------------------")
