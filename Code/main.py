@@ -1,4 +1,3 @@
-import classifier as classifier
 import pandas
 import numpy as np
 import seaborn as sns
@@ -63,9 +62,6 @@ for column_name in data_cleaned_rows.columns:
             data_cleaned_rows[column_name])
     cnt += 1
 
-
-
-
 #the features and targets are separated
 x=data_cleaned_rows.drop(columns=['Max_Loan_Amount','Loan_Status'])
 y=data_cleaned_rows[['Max_Loan_Amount','Loan_Status']]
@@ -111,6 +107,66 @@ y_pred = model.predict(x_test)
 r2 = r2_score(y_test_max_loan, y_pred)
 print("R-squared score:", r2)
 
+#logistic regression model
+'''
+Logistic regression Algorithm: σ(z)
+1. Define the Sigmoid Function
+2. Initialize Parameters (θ and B)
+3. Compute the Linear Combination: z = θ1x1+θ2x2+…+θnx n+b
+4. Apply the Sigmoid Function: y = σ(z)
+5. Define the Cost Function: J(θ)=− 1/m∑[y(i)log(y)+(1−y)log(1− y)]
+6. Gradient Descent
+    θj=θj−α∂j/∂θj
+    b = b + −α∂j/∂b
+'''
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+def initialize_parameters(dim):
+    # Initialize weights and bias to zero
+    theta = np.zeros((1, dim))
+    b = 0
+    return theta, b
+def linear_combination(X, w, b):
+    return np.dot(X, w.T) + b
+def compute_cost(y, y_hat):
+    m = len(y)
+    return -1/m * np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+def predict(X, w, b):
+    z = linear_combination(X, w, b)
+    return sigmoid(z)
+def gradient_descent(X, y, w, b, learning_rate, num_iterations):
+    m = len(y)
+    for i in range(num_iterations):
+        # Compute linear combination
+        z = linear_combination(X, w, b)
+        # Apply sigmoid function and reshape
+        y_hat = sigmoid(z).reshape(-1)
+        # Compute cost
+        cost = compute_cost(y, y_hat)
+        # Compute gradients
+        dw = 1/m * np.dot(X.T, (y_hat - y))
+        db = 1/m * np.sum(y_hat - y)
+        # Update parameters
+        w -= learning_rate * dw.T  # Transpose dw before updating weights
+        b -= learning_rate * db
+        # Print cost every 100 iterations
+        if i % 100 == 0:
+            print(f"Cost after iteration {i}: {cost}")
+    return w, b
+# Display the shapes of the training data (just for debugging)
+#print("X_train shape:", x_train.shape)
+#print("y_train shape:", y_train_loan_status.shape)
+
+# Initialize parameters before training
+w, b = initialize_parameters(x_train.shape[1])
+# Set hyperparameters
+learning_rate = 0.01
+num_iterations = 1000
+# Train the logistic regression model
+w, b = gradient_descent(x_train, y_train_loan_status, w, b, learning_rate, num_iterations)
+# Print the trained parameters
+print("Trained weights:", w)
+print("Trained bias:", b)
 
 #load_new analysis and preprocessing part
 # Load the "loan_new.csv" dataset.
@@ -164,6 +220,4 @@ for column_name in data_cleaned_rows.columns:
 numerical_features = data.select_dtypes(include=['int64', 'float64']).columns
 scaler = StandardScaler()
 data[numerical_features] = scaler.fit_transform(data[numerical_features])
-
-
 
