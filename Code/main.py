@@ -7,6 +7,7 @@ from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import r2_score
+from sklearn.preprocessing import StandardScaler
 
 
 #Load the "loan_old.csv" dataset.
@@ -47,7 +48,7 @@ print('Numerical features scale: \n')
 cnt=0
 for column_name in data_cleaned_rows.columns:
     if data_types.iloc[cnt] == 'int64' or data_types.iloc[cnt] == 'float64':
-         print(column_name,' : ',data_cleaned_rows[column_name].max()-data_cleaned_rows[column_name].min())
+        print(column_name,' : ',data_cleaned_rows[column_name].max()-data_cleaned_rows[column_name].min())
     cnt += 1
 
 print('----------------------')
@@ -110,6 +111,59 @@ y_pred = model.predict(x_test)
 r2 = r2_score(y_test_max_loan, y_pred)
 print("R-squared score:", r2)
 
+
+#load_new analysis and preprocessing part
+# Load the "loan_new.csv" dataset.
+print("------------------------Loan_new.csv Part----------------------")
+data = pandas.read_csv('loan_new.csv')
+
+# check whether there are missing values
+missing_values = data.isnull().sum()
+print('Missing values:\n', missing_values)
+
+print('----------------------')
+data_types = data.dtypes
+
+print('Data types:\n', data_types)
+
+print('----------------------')
+
+# visualize a pairplot between numerical columns
+sns.pairplot(data[['Income', 'Coapplicant_Income', 'Credit_History', 'Loan_Tenor']])
+# plot.show()
+
+# records containing missing values are removed
+data.drop(columns=['Loan_ID'], inplace=True)
+if data.isnull().values.any():
+    data_cleaned_rows = data.dropna()
+
+data_types = data_cleaned_rows.dtypes
+
+
+# check whether numerical features have the same scale
+print('Numerical features scale: \n')
+count = 0
+for column_name in data_cleaned_rows.columns:
+    if data_types.iloc[count] == 'int64' or data_types.iloc[count] == 'float64':
+        print(column_name, ' : ', data_cleaned_rows[column_name].max() - data_cleaned_rows[column_name].min())
+    count += 1
+
+print('----------------------')
+
+label_encoder = LabelEncoder()
+count = 0
+
+# categorical features are encoded
+for column_name in data_cleaned_rows.columns:
+    if data_types.iloc[count] == 'object':
+        data_cleaned_rows.loc[data_cleaned_rows.index, column_name] = label_encoder.fit_transform(
+            data_cleaned_rows[column_name])
+    count += 1
+
+# numerical features are standardized
+numerical_features = data.select_dtypes(include=['int64', 'float64']).columns
+scaler = StandardScaler()
+data[numerical_features] = scaler.fit_transform(data[numerical_features])
 
 
 
