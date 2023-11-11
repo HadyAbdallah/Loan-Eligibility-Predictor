@@ -120,6 +120,7 @@ Logistic regression Algorithm: σ(z)
     b = b + −α∂j/∂b
 '''
 def sigmoid(z):
+    z = np.array(z,dtype=float)
     return 1 / (1 + np.exp(-z))
 def initialize_parameters(dim):
     # Initialize weights and bias to zero
@@ -147,7 +148,7 @@ def gradient_descent(X, y, w, b, learning_rate, num_iterations):
         dw = 1/m * np.dot(X.T, (y_hat - y))
         db = 1/m * np.sum(y_hat - y)
         # Update parameters
-        w -= learning_rate * dw.T  # Transpose dw before updating weights
+        w -= (learning_rate * dw.T).astype(float) # Transpose dw before updating weights
         b -= learning_rate * db
         # Print cost every 100 iterations
         if i % 100 == 0:
