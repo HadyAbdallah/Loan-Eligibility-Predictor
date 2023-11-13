@@ -241,3 +241,14 @@ for column_name in data.columns:
         x_train[:, data.columns.get_loc(column_name)] = (x_train[:, data.columns.get_loc(column_name)] - mean_train) / std_train
         x_test[:, data.columns.get_loc(column_name)] = (x_test[:, data.columns.get_loc(column_name)] - mean_train) / std_train
 
+# using the models to predict the loan_amount and status 
+
+loan_amount_prediction = y_pred
+status_prediction= predict(x_train,w,b)
+
+status_prediction_YorN = ['Y' if prob >= 0.5 else 'N' for prob in status_prediction]
+
+print("Prediction of loan_amount ------------------------------------------")
+print(loan_amount_prediction)
+print("prediction of status------------------------------------------------")
+print(status_prediction_YorN)
