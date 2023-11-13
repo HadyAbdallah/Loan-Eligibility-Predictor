@@ -234,7 +234,10 @@ for column_name in data_cleaned_rows.columns:
     count += 1
 
 # numerical features are standardized
-numerical_features = data.select_dtypes(include=['int64', 'float64']).columns
-scaler = StandardScaler()
-data[numerical_features] = scaler.fit_transform(data[numerical_features])
+for column_name in data.columns:
+    if column_name in ['Income', 'Coapplicant_Income', 'Loan_Tenor']:
+        mean_train = x_train[:, data.columns.get_loc(column_name)].mean()
+        std_train = x_train[:, data.columns.get_loc(column_name)].std()
+        x_train[:, data.columns.get_loc(column_name)] = (x_train[:, data.columns.get_loc(column_name)] - mean_train) / std_train
+        x_test[:, data.columns.get_loc(column_name)] = (x_test[:, data.columns.get_loc(column_name)] - mean_train) / std_train
 
