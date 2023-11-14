@@ -233,21 +233,33 @@ for column_name in data_cleaned_rows.columns:
             data_cleaned_rows[column_name])
     count += 1
 
-# numerical features are standardized
-for column_name in data_cleaned_rows.columns:
-    if column_name in ['Income', 'Coapplicant_Income', 'Loan_Tenor']:
-        mean_train = x_train[:, data_cleaned_rows.columns.get_loc(column_name)].mean()
-        std_train = x_train[:, data_cleaned_rows.columns.get_loc(column_name)].std()
-        x_train[:, data_cleaned_rows.columns.get_loc(column_name)] = (x_train[:, data_cleaned_rows.columns.get_loc(column_name)] - mean_train) / std_train
-        x_test[:, data_cleaned_rows.columns.get_loc(column_name)] = (x_test[:, data_cleaned_rows.columns.get_loc(column_name)] - mean_train) / std_train
 
-# using the models to predict the loan_amount and status
+# numerical values are standardized
+def standardize(df, columns):
+    for column in columns:
+        mean = df[column].mean()
+        std = df[column].std()
+        df.loc[:, column] = (df[column] - mean) / std
+    return df
 
-y_prediction = model.predict(x_test)
-loan_amount_prediction = y_prediction.copy()
-status_prediction= predict(x_test,w,b)
+
+df = pandas.DataFrame(data_cleaned_rows)
+columns_to_standardize = ['Income', 'Coapplicant_Income', 'Loan_Tenor']
+df_standardized = standardize(df, columns_to_standardize)
+x_new = df_standardized.to_numpy()
+
+
+print("------------------------------------------")
+print(x_new)
+print("shape of x_new:", x_new.shape)
+
+
+# use models to predict loan_Amount and status
+loan_amount_prediction = model.predict(x_new)
+status_prediction = predict(x_new, w, b)
 status_prediction_YorN = ['Y' if prob >= 0.5 else 'N' for prob in status_prediction]
 
+print("------------------------------------------")
 print(loan_amount_prediction)
 print("---------------------------------------")
 print(status_prediction_YorN)
