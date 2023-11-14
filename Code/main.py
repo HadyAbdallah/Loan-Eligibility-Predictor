@@ -92,7 +92,6 @@ y_test_max_loan = y_test_max_loan.to_numpy()
 y_train_loan_status = y_train_loan_status.to_numpy()
 y_test_loan_status = y_test_loan_status.to_numpy()
 
-
 #Fit a linear regression model
 model = linear_model.LinearRegression()
 model.fit(x_train,y_train_max_loan)
@@ -243,19 +242,15 @@ def standardize(df, columns):
     return df
 
 
-df = pandas.DataFrame(data_cleaned_rows)
 columns_to_standardize = ['Income', 'Coapplicant_Income', 'Loan_Tenor']
-df_standardized = standardize(df, columns_to_standardize)
+df_standardized = standardize(data_cleaned_rows, columns_to_standardize)
 x_new = df_standardized.to_numpy()
 
-
-print("------------------------------------------")
-print(x_new)
-print("shape of x_new:", x_new.shape)
 
 
 # use models to predict loan_Amount and status
 loan_amount_prediction = model.predict(x_new)
+np.set_printoptions(formatter={'float': '{:0.9f}'.format})
 status_prediction = predict(x_new, w, b)
 status_prediction_YorN = ['Y' if prob >= 0.5 else 'N' for prob in status_prediction]
 
