@@ -6,7 +6,7 @@ from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import r2_score
-from sklearn.preprocessing import StandardScaler
+
 
 
 #Load the "loan_old.csv" dataset.
@@ -43,12 +43,12 @@ data_types = data_cleaned_rows.dtypes
 print('----------------------')
 
 #check whether numerical features have the same scale
-print('Numerical features scale: \n')
-cnt=0
-for column_name in data_cleaned_rows.columns:
-    if data_types.iloc[cnt] == 'int64' or data_types.iloc[cnt] == 'float64':
-        print(column_name,' : ',data_cleaned_rows[column_name].max()-data_cleaned_rows[column_name].min())
-    cnt += 1
+print('Numerical features describe: \n')
+
+numerical_column_name=['Income','Coapplicant_Income','Loan_Tenor']
+describe_data=data_cleaned_rows[numerical_column_name].describe()
+print(describe_data)
+
 
 print('----------------------')
 
@@ -58,8 +58,7 @@ cnt = 0
 #categorical features and targets are encoded
 for column_name in data_cleaned_rows.columns:
     if data_types.iloc[cnt] == 'object':
-        data_cleaned_rows.loc[data_cleaned_rows.index, column_name] = label_encoder.fit_transform(
-            data_cleaned_rows[column_name])
+        data_cleaned_rows.loc[:, column_name] = label_encoder.fit_transform(data_cleaned_rows[column_name])
     cnt += 1
 
 #the features and targets are separated
@@ -77,11 +76,10 @@ y_test_loan_status = y_test['Loan_Status']
 
 #numerical features are standardized
 
-for column_name in x_train.columns:
-    if column_name == 'Income' or column_name == 'Coapplicant_Income' or column_name == 'Loan_Tenor':
-        x_train[column_name]=(x_train[column_name]-x_train[column_name].mean())/x_train[column_name].std()
-        x_test[column_name] = (x_test[column_name] - x_test[column_name].mean()) / x_test[column_name].std()
-
+x_train_mean=x_train[numerical_column_name].mean()
+x_train_std=x_train[numerical_column_name].std()
+x_test[numerical_column_name] = (x_test[numerical_column_name] - x_train_mean) / x_train_std
+x_train[numerical_column_name] = (x_train[numerical_column_name] - x_train_mean) / x_train_std
 
 
 #Convert data to Numpy array
@@ -93,6 +91,7 @@ y_train_loan_status = y_train_loan_status.to_numpy()
 y_test_loan_status = y_test_loan_status.to_numpy()
 
 #Fit a linear regression model
+print("linear regression model: ")
 model = linear_model.LinearRegression()
 model.fit(x_train,y_train_max_loan)
 
@@ -102,11 +101,11 @@ print('Coefficients: \n', model.coef_, " ", model.intercept_)
 #predict the loan amount
 y_pred = model.predict(x_test)
 
-
 r2 = r2_score(y_test_max_loan, y_pred)
 print("R-squared score:", r2)
 
-
+print('----------------------')
+print('logistic regression model:')
 #logistic regression model
 '''
 Logistic regression Algorithm: σ(z)
@@ -163,8 +162,8 @@ w, b = initialize_parameters(x_train.shape[1])
 # Set hyperparameters
 learning_rate = 0.01
 num_iterations = 2000
-# Train the logistic regression model
-w, b = gradient_descent(x_train, y_train_loan_status, w, b, learning_rate, num_iterations)
+# Train the logistic regression modely_train_loan_status
+w, b = gradient_descent(x_train,y_train_loan_status , w, b, learning_rate, num_iterations)
 # Print the trained parameters
 print("Trained weights:", w)
 print("Trained bias:", b)
@@ -193,68 +192,38 @@ data = pandas.read_csv('loan_new.csv')
 missing_values = data.isnull().sum()
 print('Missing values:\n', missing_values)
 
-print('----------------------')
-data_types = data.dtypes
 
-print('Data types:\n', data_types)
 
-print('----------------------')
-
-# visualize a pairplot between numerical columns
-sns.pairplot(data[['Income', 'Coapplicant_Income', 'Credit_History', 'Loan_Tenor']])
-# plot.show()
-
-# records containing missing values are removed
+# records containing missing values are removed and drop Loan_ID column
 data.drop(columns=['Loan_ID'], inplace=True)
 if data.isnull().values.any():
-    data_cleaned_rows = data.dropna()
-
-data_types = data_cleaned_rows.dtypes
+    newdata_cleaned_rows = data.dropna()
 
 
-# check whether numerical features have the same scale
-print('Numerical features scale: \n')
-count = 0
-for column_name in data_cleaned_rows.columns:
-    if data_types.iloc[count] == 'int64' or data_types.iloc[count] == 'float64':
-        print(column_name, ' : ', data_cleaned_rows[column_name].max() - data_cleaned_rows[column_name].min())
-    count += 1
-
-print('----------------------')
 
 label_encoder = LabelEncoder()
 count = 0
 
 # categorical features are encoded
-for column_name in data_cleaned_rows.columns:
+for column_name in newdata_cleaned_rows.columns:
     if data_types.iloc[count] == 'object':
-        data_cleaned_rows.loc[data_cleaned_rows.index, column_name] = label_encoder.fit_transform(
-            data_cleaned_rows[column_name])
+        newdata_cleaned_rows.loc[:, column_name] = label_encoder.fit_transform(
+            newdata_cleaned_rows[column_name])
     count += 1
 
 
 # numerical values are standardized
-def standardize(df, columns):
-    for column in columns:
-        mean = df[column].mean()
-        std = df[column].std()
-        df.loc[:, column] = (df[column] - mean) / std
-    return df
-
-
-columns_to_standardize = ['Income', 'Coapplicant_Income', 'Loan_Tenor']
-df_standardized = standardize(data_cleaned_rows, columns_to_standardize)
-x_new = df_standardized.to_numpy()
-
+newdata_cleaned_rows.loc[:,numerical_column_name] = (newdata_cleaned_rows[numerical_column_name]-x_train_mean)/x_train_std
+x_new = newdata_cleaned_rows.to_numpy()
 
 
 # use models to predict loan_Amount and status
 loan_amount_prediction = model.predict(x_new)
-np.set_printoptions(formatter={'float': '{:0.9f}'.format})
+loan_amount_prediction =[0 if i <0 else i for i in loan_amount_prediction]
 status_prediction = predict(x_new, w, b)
 status_prediction_YorN = ['Y' if prob >= 0.5 else 'N' for prob in status_prediction]
 
 print("------------------------------------------")
-print(loan_amount_prediction)
+print("prediction of loan Amount:\n",loan_amount_prediction)
 print("---------------------------------------")
-print(status_prediction_YorN)
+print("prediction of loan status:\n",status_prediction_YorN)
