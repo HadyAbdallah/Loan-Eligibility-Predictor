@@ -6,7 +6,7 @@ from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import r2_score
-
+from sklearn.preprocessing import StandardScaler
 
 
 #Load the "loan_old.csv" dataset.
@@ -89,6 +89,7 @@ y_train_max_loan = y_train_max_loan.to_numpy()
 y_test_max_loan = y_test_max_loan.to_numpy()
 y_train_loan_status = y_train_loan_status.to_numpy()
 y_test_loan_status = y_test_loan_status.to_numpy()
+
 
 #Fit a linear regression model
 print("linear regression model: ")
